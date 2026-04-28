@@ -3,7 +3,7 @@ import librosa
 import tensorflow as tf
 
 # Modell & Labels laden
-model = tf.keras.models.load_model("genre_model/keras_model.h5")
+model = tf.keras.models.load_model("soundclassifier_with_metadata.tflite")
 
 with open("genre_model/labels.txt", "r") as f:
     LABELS = [line.strip() for line in f.readlines()]
