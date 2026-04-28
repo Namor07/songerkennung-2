@@ -1,2 +1,5 @@
-0 Klavier
-1 Geige
+0 Hintergrundgeräusche
+1 Rock
+2 Techno
+3 Pop
+4 Klassische Musik
