@@ -56,37 +56,40 @@ if audio and st.button("Genre analysieren"):
     with st.spinner("KI analysiert das Genre …"):
         genre = predict_genre(audio)
 
-# ----------------------------------------------
-# STORY 1 – ERKANNTES GENRE
-# ----------------------------------------------
-st.markdown(
-f"""
-<div class="wrapped-section" style="background:{random_bg()}">
-    <div class="wrapped-title">Dein Musik-Vibe</div>
-    <div class="song-meta">🎧 Genre: <b>{genre}</b></div>
-</div>
-""",
-unsafe_allow_html=True
-)
-
-# ----------------------------------------------
-# STORY 2 – SONG-EMPFEHLUNGEN AUS DEM GENRE
-# ----------------------------------------------
-st.markdown(
-    "<div class='section-heading'>🔥 Beliebte Songs aus diesem Genre</div>",
+    # ----------------------------------------------
+    # STORY 1 – ERKANNTES GENRE
+    # ----------------------------------------------
+    st.markdown(
+    f"""
+    <div class="wrapped-section" style="background:{random_bg()}">
+        <div class="wrapped-title">Dein Musik-Vibe</div>
+        <div class="song-meta">🎧 Genre: <b>{genre}</b></div>
+    </div>
+    """,
     unsafe_allow_html=True
-)
+    )
 
-genre_songs = get_songs_by_genre(genre)
+    # ----------------------------------------------
+    # STORY 2 – SONG-EMPFEHLUNGEN AUS DEM GENRE
+    # ----------------------------------------------
+    st.markdown(
+        "<div class='section-heading'>🔥 Beliebte Songs aus diesem Genre</div>",
+        unsafe_allow_html=True
+    )
 
-if not genre_songs:
-    st.info("Für dieses Genre wurden keine Songs gefunden.")
-else:
-    for song in genre_songs:
-        st.markdown(f"""
-<div class="wrapped-section" style="background:{random_bg()}">
-    <div class="wrapped-title">{song["title"]}</div>
-    <div class="song-meta">{song["artist"]}</div>
-    {"<img src='"+song["cover"]+"' class='wrapped-cover'>" if song.get("cover") else ""}
-</div>
-""", unsafe_allow_html=True)
+    genre_songs = get_songs_by_genre(genre)
+
+    if not genre_songs:
+        st.info("Für dieses Genre wurden keine Songs gefunden.")
+    else:
+        for song in genre_songs:
+            st.markdown(
+            f"""
+            <div class="wrapped-section" style="background:{random_bg()}">
+                <div class="wrapped-title">{song["title"]}</div>
+                <div class="song-meta">{song["artist"]}</div>
+                {"<img src='"+song["cover"]+"' class='wrapped-cover'>" if song.get("cover") else ""}
+            </div>
+            """,
+            unsafe_allow_html=True
+            )
