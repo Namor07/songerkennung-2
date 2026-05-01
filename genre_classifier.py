@@ -13,31 +13,34 @@ interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
+# Erwartete Audio-Länge aus Modell lesen
+EXPECTED_SAMPLES = input_details[0]["shape"][1]
+
 # Labels laden
 with open("tflite_model/labels.txt", "r") as f:
     LABELS = [line.strip() for line in f.readlines()]
 
 
 def preprocess_audio(uploaded_file):
-    # Audio aus UploadedFile lesen
+    # Datei lesen
     audio_bytes = uploaded_file.read()
     y, sr = sf.read(io.BytesIO(audio_bytes), dtype="float32")
 
     # Stereo → Mono
-    if len(y.shape) > 1:
+    if y.ndim > 1:
         y = np.mean(y, axis=1)
 
-    # Resampling auf 16 kHz
+    # Resampling auf 16 kHz (TM-Standard)
     if sr != 16000:
         y = resample(y, int(len(y) * 16000 / sr))
 
-    # Genau 1 Sekunde
-    if len(y) < 16000:
-        y = np.pad(y, (0, 16000 - len(y)))
+    # Auf Modell-Länge bringen
+    if len(y) < EXPECTED_SAMPLES:
+        y = np.pad(y, (0, EXPECTED_SAMPLES - len(y)))
     else:
-        y = y[:16000]
+        y = y[:EXPECTED_SAMPLES]
 
-    # Modellform
+    # Modell-Input-Form
     y = np.expand_dims(y, axis=0).astype(np.float32)
 
     return y
