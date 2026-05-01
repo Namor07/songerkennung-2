@@ -1,5 +1,5 @@
 0 Hintergrundgeräusche
-1 Rock
-2 Techno
-3 Pop
-4 Klassische Musik
+1 Klassische Musik
+2 Pop
+3 Rock
+4 Techno
