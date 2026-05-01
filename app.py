@@ -59,12 +59,15 @@ if audio and st.button("Genre analysieren"):
 # ----------------------------------------------
 # STORY 1 – ERKANNTES GENRE
 # ----------------------------------------------
-st.markdown(f"""
+st.markdown(
+f"""
 <div class="wrapped-section" style="background:{random_bg()}">
     <div class="wrapped-title">Dein Musik-Vibe</div>
     <div class="song-meta">🎧 Genre: <b>{genre}</b></div>
 </div>
-""", unsafe_allow_html=True)
+""",
+unsafe_allow_html=True
+)
 
 # ----------------------------------------------
 # STORY 2 – SONG-EMPFEHLUNGEN AUS DEM GENRE
