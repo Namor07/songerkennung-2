@@ -1,5 +1,6 @@
 import io
 import numpy as np
+import librosa
 import soundfile as sf
 import tensorflow as tf
 from scipy.signal import resample
@@ -21,38 +22,40 @@ with open("tflite_model/labels.txt", "r") as f:
     LABELS = [line.strip() for line in f.readlines()]
 
 
-def preprocess_audio(uploaded_file):
-    # Datei lesen
-    audio_bytes = uploaded_file.read()
-    y, sr = sf.read(io.BytesIO(audio_bytes), dtype="float32")
+def extract_segments(audio_file, sr=16000, segment_duration=5, num_segments=5):
+    y, sr = librosa.load(audio_file, sr=sr, mono=True)
 
-    # Stereo → Mono
-    if y.ndim > 1:
-        y = np.mean(y, axis=1)
+    segment_length = sr * segment_duration
+    max_start = max(0, len(y) - segment_length)
 
-    # Resampling auf 16 kHz (TM-Standard)
-    if sr != 16000:
-        y = resample(y, int(len(y) * 16000 / sr))
+    segments = []
 
-    # Auf Modell-Länge bringen
-    if len(y) < EXPECTED_SAMPLES:
-        y = np.pad(y, (0, EXPECTED_SAMPLES - len(y)))
-    else:
-        y = y[:EXPECTED_SAMPLES]
+    for _ in range(num_segments):
+        start = np.random.randint(0, max_start + 1) if max_start > 0 else 0
+        segment = y[start:start + segment_length]
 
-    # Modell-Input-Form
-    y = np.expand_dims(y, axis=0).astype(np.float32)
+        if len(segment) < segment_length:
+            segment = np.pad(segment, (0, segment_length - len(segment)))
 
-    return y
+        segments.append(segment.astype(np.float32))
+
+    return segments
 
 
-def predict_genre(uploaded_file):
-    audio = preprocess_audio(uploaded_file)
+def predict_genre(audio_file):
+    segments = extract_segments(audio_file)
 
-    interpreter.set_tensor(input_details[0]["index"], audio)
-    interpreter.invoke()
+    predictions = []
 
-    output = interpreter.get_tensor(output_details[0]["index"])[0]
-    index = int(np.argmax(output))
+    for segment in segments:
+        input_data = segment.reshape(1, -1)
+        interpreter.set_tensor(input_details[0]["index"], input_data)
+        interpreter.invoke()
 
-    return LABELS[index]
+        output = interpreter.get_tensor(output_details[0]["index"])[0]
+        predictions.append(output)
+
+    avg_prediction = np.mean(predictions, axis=0)
+    genre_index = np.argmax(avg_prediction)
+
+    return CLASS_NAMES[genre_index], avg_prediction
