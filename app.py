@@ -66,7 +66,7 @@ if audio and st.button("Analysieren"):
     # -------------------------
     # Genre Story
     # -------------------------
-     st.markdown(
+    st.markdown(
     f"""
     <div class="wrapped-section">
         <div class="wrapped-title">Dein Musik-Vibe</div>
