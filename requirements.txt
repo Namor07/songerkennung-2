@@ -1,4 +1,11 @@
-streamlit
+streamlit==1.33.0
+tensorflow==2.15.0
+numpy==1.23.5
+librosa==0.10.1
+soundfile==0.12.1
+numba==0.57.1
+scipy==1.10.1
+requests==2.31.0streamlit
 tensorflow-cpu==2.15.0
 numpy<2.0
 soundfile
