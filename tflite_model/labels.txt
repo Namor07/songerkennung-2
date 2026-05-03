@@ -2,5 +2,3 @@
 1 Klassische Musik
 2 Pop
 3 Rock
-4 Techno
-
