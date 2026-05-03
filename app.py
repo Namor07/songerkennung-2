@@ -57,25 +57,29 @@ st.write("Lade einen Song hoch und entdecke seinen Musik-Vibe.")
 
 audio = st.file_uploader("🎵 Audiodatei hochladen (MP3 oder WAV)", type=["mp3", "wav"])
 
-if audio and st.button("🎶 Genre analysieren"):
-    with st.spinner("KI analysiert den Song …"):
+if audio and st.button("Analysieren"):
+    with st.spinner("KI analysiert ..."):
         top_genres = predict_genre(audio)
 
-        main_genre, confidence = top_genres[0]
+    main_genre, confidence = top_genres[0]
         
     # -------------------------
     # Genre Story
     # -------------------------
-    st.markdown(
+     st.markdown(
     f"""
-    <div class="wrapped-section" style="background:{random_bg()}">
+    <div class="wrapped-section">
         <div class="wrapped-title">Dein Musik-Vibe</div>
-        <div class="song-meta">🎧 Genre: <b>{genre}</b></div>
-        <div class="song-meta">📊 Sicherheit: {int(max(confidence)*100)}%</div>
+        <div class="song-meta">🎧 Genre: <b>{main_genre}</b></div>
+        <div class="song-meta">📊 Sicherheit: {confidence}%</div>
     </div>
     """,
     unsafe_allow_html=True
     )
+
+    # optional: Top Genres anzeigen
+    for genre, score in top_genres:
+        st.write(f"{genre}: {score}%")
 
     # -------------------------
     # Genre Recommendations
