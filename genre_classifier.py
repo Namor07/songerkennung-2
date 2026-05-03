@@ -22,16 +22,26 @@ output_details = interpreter.get_output_details()
 
 INPUT_LENGTH = input_details[0]["shape"][1]
 
-def extract_segments(audio_file, sr=16000, num_segments=5):
+def extract_segments(audio_file, sr=16000, num_segments=15):
     y, sr = librosa.load(audio_file, sr=sr, mono=True)
 
     segment_length = INPUT_LENGTH
-    max_start = max(0, len(y) - segment_length)
+    total_length = len(y)
 
     segments = []
 
-    for _ in range(num_segments):
-        start = np.random.randint(0, max_start + 1) if max_start > 0 else 0
+    # Fixe Stellen
+    positions = [
+        0,
+        total_length // 2,
+        max(0, total_length - segment_length)
+    ]
+
+    # Zufällige Stellen
+    max_start = max(0, total_length - segment_length)
+    random_positions = np.random.randint(0, max_start + 1, size=num_segments - len(positions))
+
+    for start in list(positions) + list(random_positions):
         segment = y[start:start + segment_length]
 
         if len(segment) < segment_length:
@@ -43,6 +53,7 @@ def extract_segments(audio_file, sr=16000, num_segments=5):
 
 def predict_genre(audio_file):
     segments = extract_segments(audio_file)
+
     predictions = []
 
     for segment in segments:
@@ -52,7 +63,13 @@ def predict_genre(audio_file):
         output = interpreter.get_tensor(output_details[0]["index"])[0]
         predictions.append(output)
 
-    avg_prediction = np.mean(predictions, axis=0)
-    genre_index = np.argmax(avg_prediction)
+    avg = np.mean(predictions, axis=0)
 
-    return CLASS_NAMES[genre_index], avg_prediction
+    top_indices = avg.argsort()[-3:][::-1]
+
+    top_genres = [
+        (CLASS_NAMES[i], round(avg[i] * 100, 1))
+        for i in top_indices
+    ]
+
+    return top_genres
