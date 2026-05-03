@@ -68,6 +68,19 @@ if audio and st.button("Genre analysieren"):
     """,
     unsafe_allow_html=True
     )
+    
+    genre, confidence = predict_genre(audio)
+
+    st.markdown(
+    f"""
+    <div class="wrapped-section">
+        <div class="wrapped-title">Dein Musik-Vibe</div>
+        <div class="song-meta">🎧 Genre: <b>{genre}</b></div>
+        <div class="song-meta">📊 Sicherheit: {int(max(confidence)*100)}%</div>
+    </div>
+    """,
+    unsafe_allow_html=True
+    )
 
     # ----------------------------------------------
     # STORY 2 – SONG-EMPFEHLUNGEN AUS DEM GENRE
