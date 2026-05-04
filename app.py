@@ -57,8 +57,7 @@ def render_song_card(song):
 # UI
 # -------------------------
 st.title("🎧 Genre-Erkennung")
-st.write("Lade einen Song hoch, lasse das Genre erkennen und erhalte Vorschläge, die deinem Musikgeschmack entsprechen.
-Bisher können nur Songs aus dem Genre Pop, Rock und Klassische Musik erkannt werden.")
+st.write("Lade einen Song hoch, lasse das Genre erkennen und erhalte Vorschläge, die deinem Musikgeschmack entsprechen. Bisher können nur Songs aus dem Genre Pop, Rock und Klassische Musik erkannt werden.")
 
 audio = st.file_uploader("Audio hochladen (MP3 / WAV)", type=["mp3", "wav"])
 
