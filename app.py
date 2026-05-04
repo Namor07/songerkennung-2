@@ -4,6 +4,17 @@ import random
 from genre_classifier import predict_genre
 from recommendations import get_songs_by_genre
 
+# -------------------------
+# Genre-Mapping (KI → Last.fm)
+# -------------------------
+
+GENRE_MAPPING = {
+    "Hintergrundgeräusche": None,
+    "Klassische Musik": ["classical", "orchestral", "instrumental"],
+    "Pop": ["pop", "dance pop", "indie pop"],
+    "Rock": ["rock", "alternative rock", "classic rock"]
+}
+
 st.set_page_config(page_title="Genre Wrapped", layout="centered")
 
 # -------------------------
@@ -58,13 +69,14 @@ st.write("Lade einen Song hoch und entdecke seinen Musik-Vibe.")
 audio = st.file_uploader("🎵 Audiodatei hochladen (MP3 oder WAV)", type=["mp3", "wav"])
 
 if audio and st.button("Analysieren"):
-    with st.spinner("KI analysiert ..."):
+    with st.spinner("KI analysiert das Genre …"):
         top_genres = predict_genre(audio)
 
+    # Hauptgenre + Sicherheit
     main_genre, confidence = top_genres[0]
-        
+
     # -------------------------
-    # Genre Story
+    # UI: Erkanntes Genre
     # -------------------------
     st.markdown(
     f"""
@@ -89,19 +101,26 @@ if audio and st.button("Analysieren"):
         unsafe_allow_html=True
     )
 
-    songs = get_songs_by_genre(genre)
+        # -------------------------
+    # Genre → Last.fm Tags
+    # -------------------------
+    lastfm_tags = GENRE_MAPPING.get(main_genre)
 
-    if not songs:
-        st.info("Keine Song-Empfehlungen gefunden.")
+    if not lastfm_tags:
+        st.info("Kein Musikgenre erkannt – keine Empfehlungen möglich.")
     else:
-        for song in songs:
-            st.markdown(
-            f"""
-            <div class="wrapped-section" style="background:{random_bg()}">
-                <div class="wrapped-title">{song["title"]}</div>
-                <div class="song-meta">{song["artist"]}</div>
-                {"<img src='"+song["cover"]+"' class='wrapped-cover'>" if song.get("cover") else ""}
-            </div>
-            """,
-            unsafe_allow_html=True
-            )
+        st.write("### 🎶 Beliebte Songs aus deinem Genre")
+
+        shown = set()
+
+        for tag in lastfm_tags:
+            tracks = get_recommendations_by_genre(tag)
+
+            for song in tracks:
+                key = f"{song['artist']} - {song['title']}"
+                if key not in shown:
+                    shown.add(key)
+                    render_song_card(song)
+
+                if len(shown) >= 10:
+                    break
