@@ -24,11 +24,18 @@ def get_recommendations_by_genre(tag, api_key, limit=10):
         return tracks
 
     for t in data["tracks"]["track"]:
+        cover = None
+        if "image" in t:
+            for img in reversed(t["image"]):
+                if img.get("#text"):
+                    cover = img["#text"]
+                    break
+    
         tracks.append({
             "title": t["name"],
             "artist": t["artist"]["name"],
             "album": None,
-            "cover": t["image"][-1]["#text"] if t.get("image") else None
+            "cover": cover
         })
 
     return tracks
