@@ -1,75 +1,58 @@
 import numpy as np
-import librosa
 import tensorflow as tf
+import librosa
 
 MODEL_PATH = "soundclassifier_with_metadata.tflite"
 
-CLASS_NAMES = [
-    "Hintergrundgeräusche",
-    "Klassiche Musik",
-    "Pop",
-    "Rock",
-]
-
-interpreter = tf.lite.Interpreter(
-    model_path=MODEL_PATH,
-    experimental_delegates=[]
-)
+interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
 interpreter.allocate_tensors()
 
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
-INPUT_LENGTH = input_details[0]["shape"][1]
+CLASSES = [
+    "Hintergrundgeräusche",
+    "Klassische Musik",
+    "Pop",
+    "Rock"
+]
 
-def extract_segments(audio_file, sr=16000, num_segments=15):
+def extract_segments(audio_file, sr=44100, segment_duration=1.0, max_segments=8):
     y, sr = librosa.load(audio_file, sr=sr, mono=True)
 
-    segment_length = INPUT_LENGTH
-    total_length = len(y)
-
+    segment_length = int(sr * segment_duration)
     segments = []
 
-    # Fixe Stellen
-    positions = [
-        0,
-        total_length // 2,
-        max(0, total_length - segment_length)
-    ]
-
-    # Zufällige Stellen
-    max_start = max(0, total_length - segment_length)
-    random_positions = np.random.randint(0, max_start + 1, size=num_segments - len(positions))
-
-    for start in list(positions) + list(random_positions):
-        segment = y[start:start + segment_length]
-
-        if len(segment) < segment_length:
-            segment = np.pad(segment, (0, segment_length - len(segment)))
-
-        segments.append(segment.astype(np.float32))
+    for i in range(0, len(y) - segment_length, segment_length):
+        segment = y[i:i + segment_length]
+        if len(segment) == segment_length:
+            segments.append(segment)
+        if len(segments) >= max_segments:
+            break
 
     return segments
+
 
 def predict_genre(audio_file):
     segments = extract_segments(audio_file)
 
+    if not segments:
+        return [("Hintergrundgeräusche", 100.0)]
+
     predictions = []
 
     for segment in segments:
-        input_data = segment.reshape(1, INPUT_LENGTH)
+        input_data = np.expand_dims(segment, axis=0).astype(np.float32)
         interpreter.set_tensor(input_details[0]["index"], input_data)
         interpreter.invoke()
         output = interpreter.get_tensor(output_details[0]["index"])[0]
         predictions.append(output)
 
-    avg = np.mean(predictions, axis=0)
+    mean_prediction = np.mean(predictions, axis=0)
 
-    top_indices = avg.argsort()[-3:][::-1]
+    results = []
+    for i, score in enumerate(mean_prediction):
+        results.append((CLASSES[i], round(score * 100, 2)))
 
-    top_genres = [
-        (CLASS_NAMES[i], round(avg[i] * 100, 1))
-        for i in top_indices
-    ]
-
-    return top_genres
+    results.sort(key=lambda x: x[1], reverse=True)
+    return results
