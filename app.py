@@ -2,7 +2,7 @@ import streamlit as st
 import random
 
 from genre_classifier import predict_genre
-from recommendations import get_recommendations_by_genre(tag)
+from recommendations import get_recommendations_by_genre
 
 # -------------------------
 # Genre-Mapping (KI → Last.fm)
