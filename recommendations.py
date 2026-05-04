@@ -1,13 +1,12 @@
 import requests
 
-LASTFM_API_KEY = st.secrets.get("LASTFM_API_KEY")
 BASE_URL = "https://ws.audioscrobbler.com/2.0/"
 
-def get_recommendations_by_genre(tag, limit=10):
+def get_recommendations_by_genre(tag, api_key, limit=10):
     params = {
         "method": "tag.gettoptracks",
         "tag": tag,
-        "api_key": LASTFM_API_KEY,
+        "api_key": api_key,
         "format": "json",
         "limit": limit
     }
