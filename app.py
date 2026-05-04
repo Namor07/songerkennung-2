@@ -2,125 +2,94 @@ import streamlit as st
 import random
 
 from genre_classifier import predict_genre
-from recommendations import tracks
+from recommendations import get_recommendations_by_genre
+
+st.set_page_config(page_title="Genre-Erkennung", layout="centered")
 
 # -------------------------
 # Genre-Mapping (KI → Last.fm)
 # -------------------------
-
 GENRE_MAPPING = {
     "Hintergrundgeräusche": None,
-    "Klassische Musik": ["classical", "orchestral", "instrumental"],
-    "Pop": ["pop", "dance pop", "indie pop"],
-    "Rock": ["rock", "alternative rock", "classic rock"]
+    "Klassische Musik": ["classical", "instrumental"],
+    "Pop": ["pop", "dance pop"],
+    "Rock": ["rock", "alternative rock"]
 }
-
-st.set_page_config(page_title="Genre Wrapped", layout="centered")
 
 # -------------------------
 # Styles
 # -------------------------
-def random_bg():
-    colors = [
-        "#1DB954", "#191414", "#FF4F81", "#6A5ACD",
-        "#FF8C00", "#20B2AA", "#8A2BE2"
-    ]
-    return random.choice(colors)
-
 st.markdown("""
 <style>
-.wrapped-section {
-    max-width: 600px;
+.card {
+    max-width: 420px;
     margin: 20px auto;
-    padding: 25px;
-    border-radius: 20px;
+    padding: 20px;
+    border-radius: 18px;
     color: white;
-    text-align: center;
 }
-.wrapped-title {
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-.song-meta {
-    font-size: 18px;
-    margin: 5px 0;
-}
-.wrapped-cover {
-    margin-top: 15px;
-    width: 150px;
-    border-radius: 12px;
-}
-.section-heading {
-    text-align: center;
-    font-size: 22px;
-    margin-top: 40px;
-    font-weight: bold;
-}
+.title { font-size: 22px; font-weight: bold; }
+.meta { margin-top: 8px; font-size: 16px; }
+img { border-radius: 12px; margin-top: 10px; }
 </style>
 """, unsafe_allow_html=True)
+
+def random_bg():
+    return random.choice([
+        "#1DB954", "#9B59B6", "#E67E22", "#3498DB", "#E84393"
+    ])
+
+def render_song_card(song):
+    st.markdown(
+        f"""
+        <div class="card" style="background:{random_bg()}">
+            <div class="title">{song["title"]}</div>
+            <div class="meta">🎤 {song["artist"]}</div>
+            {"<img src='" + song["cover"] + "' width='100%'>" if song["cover"] else ""}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 # -------------------------
 # UI
 # -------------------------
-st.title("🎧 Genre Wrapped")
-st.write("Lade einen Song hoch und entdecke seinen Musik-Vibe.")
+st.title("🎧 KI-Genre-Erkennung")
+st.write("Lade einen Song hoch – die KI erkennt das Genre.")
 
-audio = st.file_uploader("🎵 Audiodatei hochladen (MP3 oder WAV)", type=["mp3", "wav"])
+audio = st.file_uploader("Audio hochladen (MP3 / WAV)", type=["mp3", "wav"])
 
-if audio and st.button("Analysieren"):
-    with st.spinner("KI analysiert das Genre …"):
-        top_genres = predict_genre(audio_file)
+if audio and st.button("Genre analysieren"):
+    with st.spinner("KI analysiert den Song …"):
+        top_genres = predict_genre(audio)
 
-    # Hauptgenre + Sicherheit
     main_genre, confidence = top_genres[0]
 
-    # -------------------------
-    # UI: Erkanntes Genre
-    # -------------------------
     st.markdown(
-    f"""
-    <div class="wrapped-section">
-        <div class="wrapped-title">Dein Musik-Vibe</div>
-        <div class="song-meta">🎧 Genre: <b>{main_genre}</b></div>
-        <div class="song-meta">📊 Sicherheit: {confidence}%</div>
-    </div>
-    """,
-    unsafe_allow_html=True
-    )
-
-    # optional: Top Genres anzeigen
-    for genre, score in top_genres:
-        st.write(f"{genre}: {score}%")
-
-    # -------------------------
-    # Genre Recommendations
-    # -------------------------
-    st.markdown(
-        "<div class='section-heading'>🔥 Beliebte Songs aus diesem Genre</div>",
+        f"""
+        <div class="card" style="background:{random_bg()}">
+            <div class="title">Dein Musik-Vibe</div>
+            <div class="meta">🎧 Genre: <b>{main_genre}</b></div>
+            <div class="meta">📊 Sicherheit: {confidence}%</div>
+        </div>
+        """,
         unsafe_allow_html=True
     )
 
-        # -------------------------
-    # Genre → Last.fm Tags
-    # -------------------------
-    lastfm_tags = GENRE_MAPPING.get(main_genre)
+    tags = GENRE_MAPPING.get(main_genre)
 
-    if not lastfm_tags:
-        st.info("Kein Musikgenre erkannt – keine Empfehlungen möglich.")
-    else:
-        st.write("### 🎶 Beliebte Songs aus deinem Genre")
+    if tags:
+        st.subheader("🎶 Beliebte Songs aus diesem Genre")
 
         shown = set()
-
-        for tag in lastfm_tags:
+        for tag in tags:
             tracks = get_recommendations_by_genre(tag)
-
             for song in tracks:
                 key = f"{song['artist']} - {song['title']}"
                 if key not in shown:
                     shown.add(key)
                     render_song_card(song)
-
-                if len(shown) >= 10:
+                if len(shown) >= 8:
                     break
+    else:
+        st.info("Für dieses Genre gibt es keine Musik-Empfehlungen.")
