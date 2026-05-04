@@ -12,9 +12,9 @@ st.set_page_config(page_title="Genre-Erkennung", layout="centered")
 # -------------------------
 GENRE_MAPPING = {
     "Hintergrundgeräusche": None,
-    "Klassische Musik": ["classical"],
-    "Pop": ["pop"],
-    "Rock": ["rock"]
+    "Klassische Musik": ["classical", "instrumental"],
+    "Pop": ["pop", "dance pop"],
+    "Rock": ["rock", "alternative rock"]
 }
 
 
