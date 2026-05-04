@@ -3,6 +3,7 @@ import random
 
 from genre_classifier import predict_genre
 from recommendations import get_recommendations_by_genre
+LASTFM_API_KEY = st.secrets["LASTFM_API_KEY"]
 
 st.set_page_config(page_title="Genre-Erkennung", layout="centered")
 
@@ -84,7 +85,7 @@ if audio and st.button("Genre analysieren"):
 
         shown = set()
         for tag in tags:
-            tracks = get_recommendations_by_genre(tag)
+            tracks = get_recommendations_by_genre(tag, LASTFM_API_KEY)
             for song in tracks:
                 key = f"{song['artist']} - {song['title']}"
                 if key not in shown:
