@@ -36,9 +36,7 @@ def get_recommendations_by_genre(tag, api_key, limit=10):
             "artist": t["artist"]["name"],
             "album": None,
             "cover": cover
-            
-        if not cover:
-            cover = "https://via.placeholder.com/300x300?text=No+Cover"    
+               
         })
 
     return tracks
