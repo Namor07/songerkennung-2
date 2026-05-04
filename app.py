@@ -70,7 +70,7 @@ audio = st.file_uploader("🎵 Audiodatei hochladen (MP3 oder WAV)", type=["mp3"
 
 if audio and st.button("Analysieren"):
     with st.spinner("KI analysiert das Genre …"):
-        top_genres = predict_genre(audio)
+        top_genres = predict_genre(audio_file)
 
     # Hauptgenre + Sicherheit
     main_genre, confidence = top_genres[0]
