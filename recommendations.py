@@ -12,12 +12,16 @@ def get_recommendations_by_genre(tag, limit=10):
         "limit": limit
     }
 
-    response = requests.get(BASE_URL, params=params)
-    data = response.json()
+    response = requests.get(
+        BASE_URL,
+        params=params,
+        headers={"User-Agent": "songerkennung-schulprojekt"}
+    )
 
+    data = response.json()
     tracks = []
 
-    if "tracks" not in data:
+    if "tracks" not in data or "track" not in data["tracks"]:
         return tracks
 
     for t in data["tracks"]["track"]:
