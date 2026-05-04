@@ -13,7 +13,6 @@ output_details = interpreter.get_output_details()
 
 CLASSES = [
     "Hintergrundgeräusche",
-    "Klassische Musik",
     "Pop",
     "Rock"
 ]
