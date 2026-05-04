@@ -1,6 +1,6 @@
 import requests
 
-LASTFM_API_KEY = "DEIN_LASTFM_API_KEY"
+LASTFM_API_KEY = st.secrets.get("LASTFM_API_KEY")
 BASE_URL = "https://ws.audioscrobbler.com/2.0/"
 
 def get_recommendations_by_genre(tag, limit=10):
