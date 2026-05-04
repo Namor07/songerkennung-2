@@ -16,6 +16,9 @@ GENRE_MAPPING = {
     "Rock": ["rock"]
 }
 
+tags = GENRE_MAPPING.get(main_genre)
+st.write("DEBUG – Last.fm Tags:", tags)
+
 # -------------------------
 # Styles
 # -------------------------
