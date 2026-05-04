@@ -16,7 +16,6 @@ GENRE_MAPPING = {
     "Rock": ["rock"]
 }
 
-st.write("DEBUG – Last.fm Tags:", tags)
 
 # -------------------------
 # Styles
