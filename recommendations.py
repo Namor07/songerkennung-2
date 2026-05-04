@@ -4,25 +4,34 @@ import streamlit as st
 LASTFM_API_KEY = "DEIN_LASTFM_API_KEY"
 LASTFM_BASE_URL = "https://ws.audioscrobbler.com/2.0/"
 
-def get_songs_by_genre(genre, limit=5):
+tracks = get_recommendations_by_genre(tag)
+
+def get_recommendations_by_genre(tag, limit=10):
+    """
+    Holt beliebte Songs zu einem Genre von Last.fm
+    """
     params = {
         "method": "tag.gettoptracks",
-        "tag": genre,
+        "tag": tag,
         "api_key": LASTFM_API_KEY,
         "format": "json",
-        "limit": limit,
+        "limit": limit
     }
 
-    response = requests.get(BASE_URL, params=params, timeout=10)
+    response = requests.get(LASTFM_BASE_URL, params=params)
     data = response.json()
 
-    songs = []
+    tracks = []
 
-    for track in data.get("tracks", {}).get("track", []):
-        songs.append({
-            "title": track["name"],
-            "artist": track["artist"]["name"],
-            "cover": track["image"][-1]["#text"] if track.get("image") else None,
+    if "tracks" not in data:
+        return tracks
+
+    for item in data["tracks"]["track"]:
+        tracks.append({
+            "title": item["name"],
+            "artist": item["artist"]["name"],
+            "album": None,
+            "cover": item["image"][-1]["#text"] if item.get("image") else None
         })
 
-    return songs
+    return tracks
