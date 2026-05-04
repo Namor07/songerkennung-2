@@ -1,8 +1,8 @@
 import requests
 import streamlit as st
 
-LASTFM_API_KEY = st.secrets["LASTFM_API_KEY"]
-BASE_URL = "https://ws.audioscrobbler.com/2.0/"
+LASTFM_API_KEY = "DEIN_LASTFM_API_KEY"
+LASTFM_BASE_URL = "https://ws.audioscrobbler.com/2.0/"
 
 def get_songs_by_genre(genre, limit=5):
     params = {
