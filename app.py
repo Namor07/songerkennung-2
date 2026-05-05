@@ -1,9 +1,11 @@
-# app.py
 import streamlit as st
 import random
 
 from genre_classifier import predict_genre
-from recommendations import get_recommendations_by_genre
+from recommendations import (
+    get_recommendations_by_genre,
+    get_artists_by_genre
+)
 
 # -------------------------
 # Config
@@ -14,11 +16,6 @@ st.set_page_config(
 )
 
 LASTFM_API_KEY = st.secrets["LASTFM_API_KEY"]
-
-PLACEHOLDER_COVER = (
-    "https://via.placeholder.com/400x400/"
-    "121212/FFFFFF?text=No+Cover"
-)
 
 # -------------------------
 # Genre-Mapping (KI → Last.fm)
@@ -35,19 +32,19 @@ GENRE_MAPPING = {
 st.markdown("""
 <style>
 .card {
-    max-width: 360px;
-    margin: 20px auto;
-    padding: 16px;
+    max-width: 420px;
+    margin: 16px auto;
+    padding: 18px;
     border-radius: 18px;
     color: white;
-    text-align: center;
 }
-.title { font-size: 18px; font-weight: bold; }
-.meta { font-size: 14px; opacity: 0.9; margin-top: 4px; }
-.cover {
-    width: 100%;
-    border-radius: 12px;
-    margin-bottom: 10px;
+.title {
+    font-size: 18px;
+    font-weight: bold;
+}
+.meta {
+    font-size: 15px;
+    margin-top: 6px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -59,14 +56,22 @@ def random_bg():
     ])
 
 def render_song_card(song):
-    cover = song.get("cover") or PLACEHOLDER_COVER
-
     st.markdown(
         f"""
         <div class="card" style="background:{random_bg()}">
-            <img class="cover" src="{cover}">
             <div class="title">{song["title"]}</div>
             <div class="meta">🎤 {song["artist"]}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+def render_artist_card(artist):
+    st.markdown(
+        f"""
+        <div class="card" style="background:{random_bg()}">
+            <div class="title">🎸 {artist["name"]}</div>
+            <div class="meta">Beliebter Künstler dieses Genres</div>
         </div>
         """,
         unsafe_allow_html=True
@@ -75,9 +80,11 @@ def render_song_card(song):
 # -------------------------
 # UI
 # -------------------------
-st.title("🎧 Genre-Erkennung (KI)")
+st.title("🎧 Genre-Erkennung mit KI")
 st.write(
-    "Lade einen Song hoch, lasse das Genre erkennen und erhalte Vorschläge, die deinem Musikgeschmack entsprechen! 🔥 Bisher können nur Songs aus dem Genre Pop und Rock erkannt werden."
+    "Lade einen Song hoch. "
+    "Die KI erkennt das Genre "
+    "und zeigt passende Songs und Künstler."
 )
 
 audio = st.file_uploader(
@@ -91,7 +98,7 @@ if audio and st.button("Genre analysieren"):
 
     main_genre, confidence = top_genres[0]
 
-    # Ergebnis-Karte
+    # Ergebnis
     st.markdown(
         f"""
         <div class="card" style="background:{random_bg()}">
@@ -106,20 +113,27 @@ if audio and st.button("Genre analysieren"):
     tags = GENRE_MAPPING.get(main_genre)
 
     if not tags:
-        st.info("Für dieses Genre gibt es noch keine Empfehlungen.")
+        st.info("Für dieses Genre gibt es keine Empfehlungen.")
     else:
+        # -------------------------
+        # Songs
+        # -------------------------
         st.subheader("🎶 Beliebte Songs aus diesem Genre")
-
         shown = set()
-        for tag in tags:
-            tracks = get_recommendations_by_genre(
-                tag,
-                LASTFM_API_KEY,
-                limit=8
-            )
 
+        for tag in tags:
+            tracks = get_recommendations_by_genre(tag, LASTFM_API_KEY)
             for song in tracks:
                 key = f"{song['artist']} - {song['title']}"
                 if key not in shown:
                     shown.add(key)
                     render_song_card(song)
+
+        # -------------------------
+        # Artists
+        # -------------------------
+        st.subheader("🎸 Beliebte Künstler & Bands")
+        artists = get_artists_by_genre(tags[0], LASTFM_API_KEY)
+
+        for artist in artists:
+            render_artist_card(artist)
