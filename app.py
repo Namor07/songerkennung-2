@@ -7,6 +7,8 @@ LASTFM_API_KEY = st.secrets["LASTFM_API_KEY"]
 
 st.set_page_config(page_title="Genre-Erkennung", layout="centered")
 
+PLACEHOLDER_COVER = "https://via.placeholder.com/400x400/111111/FFFFFF?text=No+Cover"
+
 # -------------------------
 # Genre-Mapping (KI → Last.fm)
 # -------------------------
@@ -41,14 +43,14 @@ def random_bg():
     ])
 
 def render_song_card(song):
-    cover = song.get("image")  # <-- HIER
+    cover = song.get("cover") or PLACEHOLDER_COVER
 
     st.markdown(
         f"""
         <div class="card" style="background:{random_bg()}">
+            <img src="{cover}" width="100%">
             <div class="title">{song["title"]}</div>
             <div class="meta">🎤 {song["artist"]}</div>
-            {"<img src='" + cover + "' width='100%'>" if cover else ""}
         </div>
         """,
         unsafe_allow_html=True
