@@ -88,7 +88,7 @@ st.title("🎧 Genre-Erkennung")
 st.write(
     "Lade einen Song hoch. "
     "Die KI erkennt das Genre "
-    "und zeigt basierend auf deinem Musikgeschmack passende Songs und Künstler. 🔥 Bisher können nur Songs aus dem Genre Pop und Rock erkannt werden."
+    "und zeigt basierend auf deinem Musikgeschmack passende Songs und Künstler! 🔥 Bisher können nur Songs aus dem Genre Pop und Rock erkannt werden."
 )
 
 audio = st.file_uploader(
