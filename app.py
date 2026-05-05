@@ -77,9 +77,7 @@ def render_song_card(song):
 # -------------------------
 st.title("🎧 Genre-Erkennung (KI)")
 st.write(
-    "Lade einen Song hoch. "
-    "Das KI-Modell erkennt das Genre "
-    "und zeigt passende Song-Empfehlungen."
+    "Lade einen Song hoch, lasse das Genre erkennen und erhalte Vorschläge, die deinem Musikgeschmack entsprechen! 🔥 Bisher können nur Songs aus dem Genre Pop und Rock erkannt werden."
 )
 
 audio = st.file_uploader(
