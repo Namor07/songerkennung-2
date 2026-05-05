@@ -21,9 +21,9 @@ LASTFM_API_KEY = st.secrets["LASTFM_API_KEY"]
 # Genre-Mapping (KI → Last.fm)
 # -------------------------
 GENRE_MAPPING = {
-    "Pop": ["pop"],
-    "Rock": ["rock"],
-    "Klassische Musik": ["classical"]
+    "Hintergrundgeräusche": None,
+    "Pop": ["pop", "dance pop"],
+    "Rock": ["rock", "alternative rock"]
 }
 
 # -------------------------
