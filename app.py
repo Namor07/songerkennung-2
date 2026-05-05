@@ -80,11 +80,11 @@ def render_artist_card(artist):
 # -------------------------
 # UI
 # -------------------------
-st.title("🎧 Genre-Erkennung mit KI")
+st.title("🎧 Genre-Erkennung")
 st.write(
     "Lade einen Song hoch. "
     "Die KI erkennt das Genre "
-    "und zeigt passende Songs und Künstler."
+    "und zeigt basierend auf deinem Musikgechmack passende Songs und Künstler."
 )
 
 audio = st.file_uploader(
