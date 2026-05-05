@@ -41,12 +41,14 @@ def random_bg():
     ])
 
 def render_song_card(song):
+    cover = song.get("image")  # <-- HIER
+
     st.markdown(
         f"""
         <div class="card" style="background:{random_bg()}">
             <div class="title">{song["title"]}</div>
             <div class="meta">🎤 {song["artist"]}</div>
-            {"<img src='" + song["cover"] + "' width='100%'>" if song["cover"] else ""}
+            {"<img src='" + cover + "' width='100%'>" if cover else ""}
         </div>
         """,
         unsafe_allow_html=True
