@@ -6,7 +6,7 @@ BASE_URL = "https://ws.audioscrobbler.com/2.0/"
 # -------------------------
 # Songs nach Genre
 # -------------------------
-def get_recommendations_by_genre(tag, api_key, limit=8):
+def get_recommendations_by_genre(tag, api_key, limit=50):
     params = {
         "method": "tag.gettoptracks",
         "tag": tag,
