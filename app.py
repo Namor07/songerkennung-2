@@ -7,6 +7,19 @@ from recommendations import (
     get_artists_by_genre
 )
 
+# -------------------------------------------------
+# Konfiguration
+# -------------------------------------------------
+st.set_page_config(
+    page_title="🎧 Genre-Erkennung",
+    layout="centered"
+)
+
+LASTFM_API_KEY = st.secrets["LASTFM_API_KEY"]
+
+# -------------------------------------------------
+# Session State (SEHR WICHTIG)
+# -------------------------------------------------
 if "analysis_done" not in st.session_state:
     st.session_state.analysis_done = False
 
@@ -16,58 +29,58 @@ if "main_genre" not in st.session_state:
 if "confidence" not in st.session_state:
     st.session_state.confidence = None
 
-# -------------------------
-# App-Konfiguration
-# -------------------------
-st.set_page_config(
-    page_title="Genre-Erkennung",
-    layout="centered"
-)
+if "recommendation_seed" not in st.session_state:
+    st.session_state.recommendation_seed = random.random()
 
-LASTFM_API_KEY = st.secrets["LASTFM_API_KEY"]
-
-# -------------------------
-# Genre-Mapping (KI → Last.fm)
-# -------------------------
+# -------------------------------------------------
+# Genre Mapping (KI → Last.fm Tags)
+# -------------------------------------------------
 GENRE_MAPPING = {
+    "Hintergrundgeräusche": None,
     "Pop": ["pop", "dance pop", "indie pop"],
-    "Rock": ["rock", "alternative rock", "classic rock"],
-    "Klassische Musik": ["classical"]
+    "Rock": ["rock", "alternative rock", "classic rock"]
 }
 
-# -------------------------
-# Styles (Spotify-Wrapped-ähnlich)
-# -------------------------
+# -------------------------------------------------
+# Styles
+# -------------------------------------------------
 st.markdown("""
 <style>
 .card {
     max-width: 420px;
-    margin: 16px auto;
-    padding: 18px;
+    margin: 20px auto;
+    padding: 20px;
     border-radius: 18px;
     color: white;
 }
 .title {
-    font-size: 18px;
+    font-size: 22px;
     font-weight: bold;
 }
 .meta {
-    font-size: 15px;
     margin-top: 6px;
-    opacity: 0.9;
+    font-size: 16px;
+}
+.artist-card {
+    max-width: 420px;
+    margin: 12px auto;
+    padding: 14px;
+    border-radius: 14px;
+    background: #222;
+    color: white;
+    font-size: 17px;
 }
 </style>
 """, unsafe_allow_html=True)
 
+# -------------------------------------------------
+# Hilfsfunktionen
+# -------------------------------------------------
 def random_bg():
     return random.choice([
-        "#1DB954", "#9B59B6", "#E67E22",
-        "#3498DB", "#E84393"
+        "#1DB954", "#9B59B6", "#E67E22", "#3498DB", "#E84393"
     ])
 
-# -------------------------
-# Rendering-Funktionen
-# -------------------------
 def render_song_card(song):
     st.markdown(
         f"""
@@ -82,58 +95,72 @@ def render_song_card(song):
 def render_artist_card(artist):
     st.markdown(
         f"""
-        <div class="card" style="background:{random_bg()}">
-            <div class="title">🎸 {artist["name"]}</div>
-            <div class="meta">Beliebter Künstler dieses Genres</div>
+        <div class="artist-card">
+            🎸 <b>{artist}</b>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-# -------------------------
+# -------------------------------------------------
 # UI
-# -------------------------
-st.title("🎧 Genre-Erkennung")
+# -------------------------------------------------
+st.title("🎧 Genre-Erkennung mit KI")
 st.write(
-    "Lade einen Song hoch. "
-    "Die KI erkennt das Genre "
-    "und schlägt basierend auf deinem Musikgeschmack passende Songs und Künstler vor! 🔥 Bisher können nur Songs aus dem Genre Pop und Rock erkannt werden."
+    "Lade einen Song hoch, lass das Genre von einer KI erkennen "
+    "und erhalte passende Musik-Empfehlungen. 🔥"
 )
 
 audio = st.file_uploader(
-    "Audio hochladen (MP3 / WAV)",
+    "🎵 Audio hochladen (MP3 oder WAV)",
     type=["mp3", "wav"]
 )
 
-if audio and st.button("Genre analysieren"):
+# -------------------------------------------------
+# Genre analysieren (NUR Analyse!)
+# -------------------------------------------------
+if audio and st.button("🎶 Genre analysieren"):
     with st.spinner("KI analysiert den Song …"):
         top_genres = predict_genre(audio)
 
     st.session_state.main_genre, st.session_state.confidence = top_genres[0]
     st.session_state.analysis_done = True
+    st.session_state.recommendation_seed = random.random()
 
+# -------------------------------------------------
+# Analyse-Ergebnis anzeigen
+# -------------------------------------------------
 if st.session_state.analysis_done:
-    main_genre = st.session_state.main_genre
-    confidence = st.session_state.confidence
-
     st.markdown(
         f"""
         <div class="card" style="background:{random_bg()}">
             <div class="title">Dein Musik-Vibe</div>
-            <div class="meta">🎧 Genre: <b>{main_genre}</b></div>
-            <div class="meta">📊 Sicherheit: {confidence:.1f}%</div>
+            <div class="meta">🎧 Genre: <b>{st.session_state.main_genre}</b></div>
+            <div class="meta">📊 Sicherheit: {st.session_state.confidence:.1f}%</div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    tags = GENRE_MAPPING.get(main_genre)
+# -------------------------------------------------
+# Neue Empfehlungen Button
+# -------------------------------------------------
+if st.session_state.analysis_done:
+    if st.button("🔁 Neue Empfehlungen laden"):
+        st.session_state.recommendation_seed = random.random()
 
-    if tags:
-        # 🔁 Neuer Button
-        if st.button("🔁 Neue Empfehlungen laden"):
-            st.session_state.refresh = random.random()
+# -------------------------------------------------
+# Empfehlungen anzeigen (IMMER NUR EINMAL)
+# -------------------------------------------------
+if st.session_state.analysis_done:
+    random.seed(st.session_state.recommendation_seed)
 
+    tags = GENRE_MAPPING.get(st.session_state.main_genre)
+
+    if not tags:
+        st.info("Für dieses Genre gibt es keine Empfehlungen.")
+    else:
+        # ---------------- Songs ----------------
         st.subheader("🎶 Beliebte Songs aus diesem Genre")
 
         all_tracks = []
@@ -157,77 +184,15 @@ if st.session_state.analysis_done:
             if len(shown) >= 8:
                 break
 
+        # ---------------- Artists ----------------
         st.subheader("🎸 Beliebte Künstler & Bands")
 
         artists = get_artists_by_genre(
             tags[0],
             LASTFM_API_KEY,
-            limit=10
+            limit=15
         )
 
         random.shuffle(artists)
-        for artist in artists:
-            render_artist_card(artist)
-    
-    main_genre, confidence = top_genres[0]
-
-    # -------------------------
-    # Ergebnisanzeige
-    # -------------------------
-    st.markdown(
-        f"""
-        <div class="card" style="background:{random_bg()}">
-            <div class="title">Dein Musik-Vibe</div>
-            <div class="meta">🎧 Genre: <b>{main_genre}</b></div>
-            <div class="meta">📊 Sicherheit: {confidence:.1f}%</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    tags = GENRE_MAPPING.get(main_genre)
-
-    if not tags:
-        st.info("Für dieses Genre gibt es derzeit keine Empfehlungen.")
-    else:
-        # -------------------------
-        # 🎶 Song-Empfehlungen (zufällig)
-        # -------------------------
-        st.subheader("🎶 Beliebte Songs aus diesem Genre")
-
-        all_tracks = []
-        for tag in tags:
-            all_tracks.extend(
-                get_recommendations_by_genre(
-                    tag,
-                    LASTFM_API_KEY,
-                    limit=30   # große Auswahl
-                )
-            )
-
-        random.shuffle(all_tracks)
-        shown = set()
-
-        for song in all_tracks:
-            key = f"{song['artist']} - {song['title']}"
-            if key not in shown:
-                shown.add(key)
-                render_song_card(song)
-            if len(shown) >= 8:
-                break
-
-        # -------------------------
-        # 🎸 Künstler-Empfehlungen
-        # -------------------------
-        st.subheader("🎸 Beliebte Künstler & Bands")
-
-        artists = get_artists_by_genre(
-            tags[0],
-            LASTFM_API_KEY,
-            limit=8
-        )
-
-        random.shuffle(artists)
-
-        for artist in artists:
+        for artist in artists[:8]:
             render_artist_card(artist)
