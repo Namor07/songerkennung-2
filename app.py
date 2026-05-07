@@ -7,6 +7,15 @@ from recommendations import (
     get_artists_by_genre
 )
 
+if "analysis_done" not in st.session_state:
+    st.session_state.analysis_done = False
+
+if "main_genre" not in st.session_state:
+    st.session_state.main_genre = None
+
+if "confidence" not in st.session_state:
+    st.session_state.confidence = None
+
 # -------------------------
 # App-Konfiguration
 # -------------------------
@@ -100,6 +109,66 @@ if audio and st.button("Genre analysieren"):
     with st.spinner("KI analysiert den Song …"):
         top_genres = predict_genre(audio)
 
+    st.session_state.main_genre, st.session_state.confidence = top_genres[0]
+    st.session_state.analysis_done = True
+
+if st.session_state.analysis_done:
+    main_genre = st.session_state.main_genre
+    confidence = st.session_state.confidence
+
+    st.markdown(
+        f"""
+        <div class="card" style="background:{random_bg()}">
+            <div class="title">Dein Musik-Vibe</div>
+            <div class="meta">🎧 Genre: <b>{main_genre}</b></div>
+            <div class="meta">📊 Sicherheit: {confidence:.1f}%</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    tags = GENRE_MAPPING.get(main_genre)
+
+    if tags:
+        # 🔁 Neuer Button
+        if st.button("🔁 Neue Empfehlungen laden"):
+            st.session_state.refresh = random.random()
+
+        st.subheader("🎶 Beliebte Songs aus diesem Genre")
+
+        all_tracks = []
+        for tag in tags:
+            all_tracks.extend(
+                get_recommendations_by_genre(
+                    tag,
+                    LASTFM_API_KEY,
+                    limit=40
+                )
+            )
+
+        random.shuffle(all_tracks)
+
+        shown = set()
+        for song in all_tracks:
+            key = f"{song['artist']} - {song['title']}"
+            if key not in shown:
+                shown.add(key)
+                render_song_card(song)
+            if len(shown) >= 8:
+                break
+
+        st.subheader("🎸 Beliebte Künstler & Bands")
+
+        artists = get_artists_by_genre(
+            tags[0],
+            LASTFM_API_KEY,
+            limit=10
+        )
+
+        random.shuffle(artists)
+        for artist in artists:
+            render_artist_card(artist)
+    
     main_genre, confidence = top_genres[0]
 
     # -------------------------
