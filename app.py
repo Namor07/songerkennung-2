@@ -92,7 +92,7 @@ st.write(
 )
 
 audio = st.file_uploader(
-    "Audio hochladen (MP3 / WAV)",
+    "Audiodatei hochladen (MP3 oder WAV)",
     type=["mp3", "wav"]
 )
 
