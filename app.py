@@ -11,7 +11,7 @@ from recommendations import (
 # App-Konfiguration
 # -------------------------
 st.set_page_config(
-    page_title="Genre-Erkennung mit KI",
+    page_title="Genre-Erkennung",
     layout="centered"
 )
 
