@@ -11,7 +11,7 @@ from recommendations import (
 # App-Konfiguration
 # -------------------------
 st.set_page_config(
-    page_title="Genre-Erkennung mit KI",
+    page_title="Genre-Erkennung",
     layout="centered"
 )
 
@@ -84,12 +84,11 @@ def render_artist_card(artist):
 # -------------------------
 # UI
 # -------------------------
-st.title("🎧 Genre-Erkennung mit KI")
+st.title("🎧 Genre-Erkennung")
 st.write(
     "Lade einen Song hoch. "
     "Die KI erkennt das Genre "
-    "und zeigt dir passende Songs und Künstler. "
-    "Die Empfehlungen variieren bei jedem Klick 🎲"
+    "und schlägt basierend auf deinem Musikgeschmack passende Songs und Künstler vor! 🔥 Bisher können nur Songs aus dem Genre Pop oder Rock erkannt werden."
 )
 
 audio = st.file_uploader(
