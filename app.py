@@ -92,8 +92,8 @@ st.write(
 )
 
 audio = st.file_uploader(
-    "Audiodatei hochladen (MP3 oder WAV)",
-    type=["mp3", "wav"]
+    "Audiodatei hochladen (MP3)",
+    type=["mp3"]
 )
 
 if audio and st.button("Genre analysieren"):
